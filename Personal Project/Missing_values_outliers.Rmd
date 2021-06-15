@@ -1,0 +1,81 @@
+---
+title: "Missing Data and Outliers Analysis"
+author: "Michalina Jablonska"
+date: "6/13/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(naniar)
+library(caret)
+library(outliers)
+```
+
+
+##  1. Describe missing data, provide summary of missing data, similar to the analysis in the Chapter 2 (table 3): Count of missing data/percent per variable, type of missing data (NA, null), total percent of missingness per dataset [ - 20pts]
+
+If you find that there is no missing data, you still have to report your findings. Your reader does not know your data and you have to show how reliable your data is.
+
+Answer: There is a missing value present in the 'Color Deficiency' identifier where the information on the respondent experiencing color deficiency (Y/N) was not provided (NA). The missing value constitutes of 2% of the dataset. 
+
+```{r desc}
+viz = read.csv("Visualization_Assessment_June_13.csv")
+summary(viz)
+
+#missing values count
+sum(is.na(viz)==TRUE)
+
+#complete cases
+table(complete.cases(viz))
+prop.table(table(complete.cases(viz)))*100
+
+#identifying missing values
+sort(sapply(viz, function(x) sum(is.na(x))))
+```
+
+## 2. Plot visualization of missing data pattern [ - 20pts]
+If you do not have missing data, you still need to plot it to show it to your reader
+
+As visualized below, there is minimal (< 0.1%) missing value impact in this dataset.There is no need for deletion.
+
+```{r viz}
+vis_miss(viz)
+```
+
+## 3. Describe what type of missing data you have observed: MCAR, MAR, MNAR or no missing data [- 10pts]
+If you do not have missing data, simply state that you did not observe any missing values
+
+Only one missing value observed, no taxonomy observed.
+
+## 4. Select Imputation method that you will be performing and explain why [20pts]:
+list-wise/pair-wise deletions, mean imputation, regression imputation etc [ - 10pts]
+perform imputation and provide data statistics. For example, if you perform list-wise deletion, how many observations will you use for consequent analysis. If you perform regression imputation, provide statistic summary [-10pts]
+If you do not have any missing data: instead of imputation, perform data normalization, describe which methods you will use, why and perform the normalization. Provide statistical summary of data after the normalization¶
+
+Performing standarization to normalize the duration, age and score variables
+
+```{r}
+preproc_viz = preProcess(viz[,c(2:3,21)])
+norm = predict(preproc_viz, viz[,c(2:3,21)])
+summary(norm)
+```
+
+5. Outlier analysis:
+There are 4 outliers in the duration variable, none for the score variable
+
+```{r}
+#z-scores for duration variable
+z.scores = viz$Duration_sec %>% scores(type = "z")
+z.scores %>% summary()
+which(abs(z.scores)>3)
+
+#z-scores for score variable
+z.scores = viz$Score %>% scores(type = "z")
+z.scores %>% summary()
+which(abs(z.scores)>3)
+```
+

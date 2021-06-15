@@ -1,0 +1,87 @@
+---
+title: "Visual_Exploration_Michalina"
+author: "Michalina Jablonska"
+date: "6/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Data Import
+
+```{r import}
+library(ggplot2)
+library(dplyr)
+library(expss)
+library(moments)
+
+df = read.csv('/Users/misia/Documents/harrisburg/summer 2021/GRAD699/Visualization_Assessment.csv')
+summary(df)
+```
+
+
+## Univariate Analysis
+
+Outliers can be observed for the results collected so far. For the click count variable collected in single units, there is a potential outlier at around 70 clicks.The distribution so far seems to be somewhat skewed to the right. Based on the observation of histogram, additional calculation for swekweness and kurtosis were conducted revealing positive results for both of those values. As an additional portion of data from new respondents will be added to the data pool, the above mentioned results will be re-calculated.
+
+```{r histogram}
+clickHistogram = ggplot(df, aes(Click_Count))
+clickHistogram + geom_histogram(bins = 30, color = "grey", fill = "cornflowerblue") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) +
+  ggtitle("Click Count for Tasks Performed") +
+  labs(x = "Clicks per Participant", y = "Count")
+
+skewness(df$Click_Count)
+kurtosis(df$Click_Count)
+```
+
+## Box Plot
+
+The box plot below is analyzing the time spent on tasks split by the participants gender. Within the male population there seems to be more prone to outliers. What also seems to characterize the male population of respondents is higher dispresion of results compared to female respondents.
+
+```{r box_plot, echo=FALSE}
+ggplot(df, aes(x=Gender, y=Duration_sec, na.rm = TRUE)) + 
+  geom_boxplot() + 
+  scale_fill_brewer(palette="Blues") + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text()) + 
+  labs(title = "Time Spent on Assignment",
+       x= 'Gender', y='Time in Seconds') +
+  annotate("text", x= 1, y= 550, label = "Outlier", color = "Blue") +
+  annotate("text", x= 2, y= 1060, label = "Outlier", color = "Blue") +
+  annotate("text", x= 2, y= 1700, label = "Outlier", color = "Blue")
+```
+
+## Bar Chart
+
+For each task a score was assigned resulting in a total score provided for each participant. The below bar chart illustrates the distribution of scores split by participant age. With the average score equal to around 4 points, it is noticeable that with age the differences in range scores are more evident. For the group of respondents of 55-64 years old, the score was specifically very spread between the possible highest to the possible lowest.
+
+```{r bar_chart, echo=FALSE}
+bar = ggplot(df, aes(Age, Score))
+bar + stat_summary(fun = mean, geom = "bar", fill = "White", colour = "Black") + stat_summary(fun.data = mean_cl_normal, geom = "pointrange") + labs(x = "Age", y = "Mean Score")
+```
+
+## Rankings Plot
+
+After the respondents completed the tasks of answering questions checking their understanding of visualizations, they were asked to ranked the same visualizations based on their perception of graph readability. Below figures illustrate these rankings. Figure 5 was the least accessible design with non-colorblind friendly palette, poor color contrast and Times New Roman font that is discouraged for subjects with dyslexia. In contrast, Figure 4, was designed in a way that checked all the requirements for accessibility defined in the research based on academic research and WCAG guidelines. Based on the initial analysis of bar charts below, this trend seems to be reflected in the assigned ranks and in line with the research hypothesis.
+
+```{r ranks, echo=FALSE}
+Fig1_Rank = ggplot(df, aes(Rank_Fig5))
+Fig1_Rank + geom_histogram(color = "grey", fill = "#e66101") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) +
+  ggtitle("Participant Ranking for least Accessible Chart") +
+  labs(x = "Rank (1 being the most readable)", y = "")
+
+Fig4_Rank = ggplot(df, aes(Rank_Fig4))
+Fig4_Rank + geom_histogram(color = "grey", fill = "#4a3175") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey")) +
+  ggtitle("Participant Ranking for most Accessible Chart") +
+  labs(x = "Rank (1 being the most readable)", y = "")
+```
+
